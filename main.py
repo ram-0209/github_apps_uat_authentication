@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from starlette.responses import RedirectResponse
+from starlette.responses import RedirectResponse, JSONResponse
 import httpx
 from cachetools import TTLCache
 import json
@@ -35,20 +35,10 @@ async def github_code(code: str):
             headers=headers,
         )
     response_json = response.json()
-    print(response_json)
     access_token = response_json["access_token"]
     cache["access_token"] = access_token
-    async with httpx.AsyncClient() as client:
-        headers.update({"Authorization": f"Bearer {access_token}"})
-        response = await client.get("https://api.github.com/user", headers=headers)
-    response = response.json()
-    user_name = response["login"]
-    # return RedirectResponse(f"http://localhost:8000/get_token")
-    # return RedirectResponse(
-    #     f"http://localhost:8000/get_repo?user_name={user_name}&repo_name=Testing_repo"
-    # )
-    return RedirectResponse(
-        f"http://localhost:8000/create_repo_using_template?user_name={user_name}&repo_name=Testing_repo"
+    return JSONResponse(
+        content={"detail": response_json, "message": "Access Token is created"}
     )
 
 
@@ -59,6 +49,18 @@ async def get_token():
         return {"token": cache_token}
     else:
         return {"message": "token not found"}
+
+
+@app.get("/get_user")
+async def get_user():
+    cache_token = cache.get("access_token")
+    async with httpx.AsyncClient() as client:
+        headers = {
+            "Accept": "application/json",
+            "Authorization": f"Bearer {cache_token}",
+        }
+        response = await client.get("https://api.github.com/user", headers=headers)
+    response = response.json()
 
 
 @app.get("/get_repo")
