@@ -1,22 +1,28 @@
 from fastapi import FastAPI
 from starlette.responses import RedirectResponse, JSONResponse
+from pydantic import BaseModel
 import httpx
 from cachetools import TTLCache
 import json
 
 app = FastAPI()
 
-CLIENT_ID = "449018d9e8d20ed29cb7"
-CLIENT_SECRET = "69dcc54184a539e2647b84667ea1074ef670434d"
+CLIENT_ID = "Iv1.f084c3b0c27ee65c"
+CLIENT_SECRET = "b6be27d919507eaf8f68da63b72cf6a186e75aa1"
 
 
 cache = TTLCache(maxsize=100, ttl=1800)
 
 
+class TemplateRepoRequest(BaseModel):
+    owner: str
+    name: str
+
+
 @app.get("/login")
 async def github_login():
     return RedirectResponse(
-        f"https://github.com/login/oauth/authorize?client_id={CLIENT_ID}&scope=repo"
+        f"https://github.com/login/oauth/authorize?client_id={CLIENT_ID}"
     )
 
 
@@ -74,21 +80,16 @@ async def get_repo(user_name: str, repo_name: str):
     return response.json()
 
 
-@app.get("/create_repo_using_template")
-async def create_repo_using_template(user_name: str, repo_name: str):
+@app.post("/create_repo_using_template")
+async def create_repo_using_template(
+    user_name: str, repo_name: str, request: TemplateRepoRequest
+):
     cache_token = cache.get("access_token")
-    payload = {
-        "owner": "ram-0209",
-        "name": "Testing_repo_2",
-        "description": "Created using template",
-        "include_all_branches": False,
-        "private": False,
-    }
     headers = {"Accept": "application/json", "Authorization": f"Bearer {cache_token}"}
     async with httpx.AsyncClient() as client:
         response = await client.post(
-            f"https://api.github.com/repos/ram-0209/Testing_repo/generate",
+            f"https://api.github.com/repos/{user_name}/{repo_name}/generate",
             headers=headers,
-            data=json.dumps(payload),
+            json={"owner": request.owner, "name": request.name},
         )
     return response.json()

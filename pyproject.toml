@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "github_oauth_testing"
+name = "github_app_auth_UAT"
 version = "0.1.0"
 description = ""
 authors = ["ram-0209 <ramkarthick.alag@tigeranalytics.com>"]
