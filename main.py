@@ -1,3 +1,4 @@
+"""Github App Authentication"""
 from fastapi import FastAPI
 from starlette.responses import RedirectResponse, JSONResponse
 from pydantic import BaseModel
