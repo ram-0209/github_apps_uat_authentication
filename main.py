@@ -7,8 +7,9 @@ import json
 
 app = FastAPI()
 
-CLIENT_ID = "Iv1.f084c3b0c27ee65c"
-CLIENT_SECRET = "b6be27d919507eaf8f68da63b72cf6a186e75aa1"
+# Enter the Client ID and Secret for your github app
+CLIENT_ID = ""
+CLIENT_SECRET = ""
 
 
 cache = TTLCache(maxsize=100, ttl=1800)
